@@ -161,6 +161,12 @@ typedef struct H264Picture {
     int recovered;          ///< picture at IDR or recovery point + recovery count
     int invalid_gap;
     int sei_recovery_frame_cnt;
+
+    AVBufferRef *pps_buf;
+    const PPS   *pps;
+
+    int mb_width, mb_height;
+    int mb_stride;
 } H264Picture;
 
 typedef struct H264Ref {
@@ -533,6 +539,8 @@ typedef struct H264Context {
      * slices) anymore */
     int setup_finished;
 
+    int got_first_iframe;
+
     int cur_chroma_format_idc;
     int cur_bit_depth_luma;
     int16_t slice_row[MAX_SLICES]; ///< to detect when MAX_SLICES is too low
@@ -832,8 +840,6 @@ int ff_h264_slice_context_init(H264Context *h, H264SliceContext *sl);
 
 void ff_h264_draw_horiz_band(const H264Context *h, H264SliceContext *sl, int y, int height);
 
-int ff_h264_decode_slice_header(H264Context *h, H264SliceContext *sl,
-                                const H2645NAL *nal);
 /**
  * Submit a slice for decoding.
  *

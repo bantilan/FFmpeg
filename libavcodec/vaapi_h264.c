@@ -22,7 +22,7 @@
 
 #include "h264dec.h"
 #include "h264_ps.h"
-#include "hwaccel.h"
+#include "hwconfig.h"
 #include "vaapi_decode.h"
 
 /**
@@ -256,9 +256,6 @@ static int vaapi_h264_start_frame(AVCodecContext          *avctx,
             .log2_max_pic_order_cnt_lsb_minus4      = sps->log2_max_poc_lsb - 4,
             .delta_pic_order_always_zero_flag       = sps->delta_pic_order_always_zero_flag,
         },
-        .num_slice_groups_minus1                    = pps->slice_group_count - 1,
-        .slice_group_map_type                       = pps->mb_slice_group_map_type,
-        .slice_group_change_rate_minus1             = 0, /* FMO is not implemented */
         .pic_init_qp_minus26                        = pps->init_qp - 26,
         .pic_init_qs_minus26                        = pps->init_qs - 26,
         .chroma_qp_index_offset                     = pps->chroma_qp_index_offset[0],
@@ -316,6 +313,11 @@ static int vaapi_h264_end_frame(AVCodecContext *avctx)
     VAAPIDecodePicture *pic = h->cur_pic_ptr->hwaccel_picture_private;
     H264SliceContext *sl = &h->slice_ctx[0];
     int ret;
+
+    if (pic->nb_slices == 0) {
+        ret = AVERROR_INVALIDDATA;
+        goto finish;
+    }
 
     ret = ff_vaapi_decode_issue(avctx, pic);
     if (ret < 0)
