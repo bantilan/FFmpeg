@@ -1315,8 +1315,8 @@ static int http_connect(URLContext *h, const char *path, const char *local_path,
             av_free(cookies);
         }
     }
-    if (!has_header(s->headers, "\r\nIcy-MetaData: ") && s->icy)
-        av_bprintf(&request, "Icy-MetaData: 1\r\n");
+    /*if (!has_header(s->headers, "\r\nIcy-MetaData: ") && s->icy)
+        av_bprintf(&request, "Icy-MetaData: 1\r\n");*/
 
     /* now add in custom headers */
     if (s->headers)
